@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		"spring.datasource.password=",
 		"spring.sql.init.mode=never",
 		"app.admin.password=test-admin-password",
+		"app.cookie.secure=true",
 		"app.session.secret=test-session-secret-that-is-at-least-32-characters"
 })
 @AutoConfigureMockMvc
@@ -42,6 +43,10 @@ class SystransApplicationTests {
 						"""))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.authenticated").value(true))
+				.andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+						.string("Set-Cookie", org.hamcrest.Matchers.allOf(
+								org.hamcrest.Matchers.containsString("SameSite=None"),
+								org.hamcrest.Matchers.containsString("Secure"))))
 				.andReturn();
 
 		String cookie = login.getResponse().getCookie("sysTransAdmin").getValue();

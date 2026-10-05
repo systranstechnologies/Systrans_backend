@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,6 +51,16 @@ class SystransApplicationTests {
 				.andReturn();
 
 		String cookie = login.getResponse().getCookie("sysTransAdmin").getValue();
+		java.util.regex.Matcher tokenMatcher = java.util.regex.Pattern
+				.compile("\"token\":\"([^\"]+)\"")
+				.matcher(login.getResponse().getContentAsString());
+		org.junit.jupiter.api.Assertions.assertTrue(tokenMatcher.find());
+		String token = tokenMatcher.group(1);
+		org.junit.jupiter.api.Assertions.assertTrue(token.contains("."));
+		mockMvc.perform(get("/api/admin/session").header("Authorization", "Bearer " + token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.authenticated").value(true));
+
 		mockMvc.perform(get("/api/admin/session").cookie(login.getResponse().getCookie("sysTransAdmin")))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.authenticated").value(true));
@@ -92,5 +103,17 @@ class SystransApplicationTests {
 						}
 						"""))
 				.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void corsAllowsBearerAuthorizationHeader() throws Exception {
+		mockMvc.perform(options("/api/admin/session")
+				.header("Origin", "https://example.netlify.app")
+				.header("Access-Control-Request-Method", "GET")
+				.header("Access-Control-Request-Headers", "authorization,content-type"))
+				.andExpect(status().isOk())
+				.andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+						.string("Access-Control-Allow-Headers",
+								org.hamcrest.Matchers.containsStringIgnoringCase("authorization")));
 	}
 }

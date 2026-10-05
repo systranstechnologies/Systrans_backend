@@ -4,7 +4,7 @@ This service provides the jobs API used by the Angular careers page:
 
 - `GET /api/jobs` lists published vacancies.
 - `GET /api/admin/session` checks the signed admin cookie.
-- `POST /api/admin/login` signs in with `ADMIN_PASSWORD`.
+- `POST /api/admin/login` signs in with `ADMIN_PASSWORD` and returns a signed session token for the `Authorization: Bearer` header.
 - `POST /api/admin/logout` clears the admin cookie.
 - `POST /api/jobs` creates a vacancy for an authenticated admin.
 
@@ -39,3 +39,5 @@ Run backend tests independently:
 ```
 
 For production, deploy this Spring service to a Java-capable host, configure its environment variables, and set the frontend API URL in `src/environments/environment.ts`. The frontend and backend are independent deployments.
+
+The Angular admin page sends the login token in the `Authorization: Bearer` header for session checks and vacancy saves. This avoids relying on third-party cookies when the frontend and API are hosted on different sites. The token is kept in the current browser tab's session storage and expires after eight hours; logout removes it.

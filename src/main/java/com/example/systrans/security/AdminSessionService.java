@@ -45,6 +45,11 @@ public class AdminSessionService {
 	}
 
 	public boolean isAuthenticated(HttpServletRequest request) {
+		String authorizationHeader = request.getHeader("Authorization");
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			return isValidToken(authorizationHeader.substring("Bearer ".length()).trim());
+		}
+
 		String cookieHeader = request.getHeader("Cookie");
 		if (cookieHeader == null || cookieHeader.isBlank()) {
 			return false;

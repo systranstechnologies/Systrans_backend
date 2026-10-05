@@ -59,7 +59,7 @@ public class JobController {
 	}
 
 	@PostMapping("/admin/login")
-	public ResponseEntity<AdminSessionResponse> login(
+	public ResponseEntity<AdminLoginResponse> login(
 			@Valid @RequestBody AdminLoginRequest login,
 			HttpServletRequest request) {
 		String rateLimitKey = request.getRemoteAddr();
@@ -70,9 +70,11 @@ public class JobController {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid admin password.");
 		}
 		loginRateLimiter.clear(rateLimitKey);
+		String token = adminSessionService.issueCookieValue();
 		return ResponseEntity.ok()
-				.header("Set-Cookie", sessionCookie(adminSessionService.issueCookieValue(), adminSessionService.sessionDurationSeconds()).toString())
-				.body(new AdminSessionResponse(true));
+				.header("Cache-Control", "no-store")
+				.header("Set-Cookie", sessionCookie(token, adminSessionService.sessionDurationSeconds()).toString())
+				.body(new AdminLoginResponse(true, token));
 	}
 
 	@PostMapping("/admin/logout")

@@ -14,7 +14,7 @@ Spring Boot reads these variables from the process environment or a local `.env`
 
 - `MYSQL_URL`, `MYSQL_USER`, `MYSQL_PASSWORD`
 - `ADMIN_PASSWORD`
-- `SESSION_SECRET` with at least 32 characters
+- `SESSION_SECRET` with at least 32 characters. Keep the same stable value on every running API replica; changing it invalidates existing admin sessions.
 - `SERVER_PORT` (optional; defaults to `8080`)
 - `COOKIE_SECURE=true` when served over HTTPS; this sets the cross-site admin cookie to `SameSite=None; Secure`. It defaults to `true` for production deployments. For local HTTP-only development, set `COOKIE_SECURE=false`.
 - `CORS_ALLOWED_ORIGINS` with comma-separated Angular site origins or supported origin patterns

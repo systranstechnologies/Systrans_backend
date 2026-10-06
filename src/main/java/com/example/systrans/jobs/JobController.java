@@ -89,6 +89,8 @@ public class JobController {
 			@Valid @RequestBody CreateJobRequest job,
 			HttpServletRequest request) {
 		if (!adminSessionService.isAuthenticated(request)) {
+			LOGGER.warn("Rejected vacancy creation because the admin session was invalid (Authorization header {}).",
+					request.getHeader("Authorization") == null ? "missing" : "present");
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required.");
 		}
 		try {

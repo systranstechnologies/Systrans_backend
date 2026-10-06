@@ -106,6 +106,41 @@ class SystransApplicationTests {
 	}
 
 	@Test
+	void adminCanCreateJobUsingBearerToken() throws Exception {
+		MvcResult login = mockMvc.perform(post("/api/admin/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{"password":"test-admin-password"}
+						"""))
+				.andExpect(status().isOk())
+				.andReturn();
+		java.util.regex.Matcher tokenMatcher = java.util.regex.Pattern
+				.compile("\"token\":\"([^\"]+)\"")
+				.matcher(login.getResponse().getContentAsString());
+		org.junit.jupiter.api.Assertions.assertTrue(tokenMatcher.find());
+
+		mockMvc.perform(post("/api/jobs")
+				.header("Authorization", "Bearer " + tokenMatcher.group(1))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+						{
+						  "title":"Engineer",
+						  "department":"Engineering",
+						  "location":"Remote",
+						  "employmentType":"Full-time",
+						  "workplaceType":"Remote",
+						  "experienceLevel":"Mid-level",
+						  "summary":"Build software.",
+						  "description":"Build software.",
+						  "requirements":"Experience required.",
+						  "applicationEmail":"jobs@example.com"
+						}
+						"""))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.id").isNumber());
+	}
+
+	@Test
 	void corsAllowsBearerAuthorizationHeader() throws Exception {
 		mockMvc.perform(options("/api/admin/session")
 				.header("Origin", "https://example.netlify.app")

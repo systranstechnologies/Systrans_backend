@@ -1,10 +1,12 @@
 package com.example.systrans;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -30,6 +32,34 @@ class SystransApplicationTests {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	@BeforeEach
+	void createJobsTable() {
+		jdbcTemplate.execute("""
+				CREATE TABLE IF NOT EXISTS job_vacancies (
+				    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+				    title VARCHAR(200) NOT NULL,
+				    department VARCHAR(100) NOT NULL,
+				    location VARCHAR(160) NOT NULL,
+				    employment_type VARCHAR(60) NOT NULL,
+				    workplace_type VARCHAR(40) NOT NULL,
+				    experience_level VARCHAR(100) NOT NULL,
+				    salary_range VARCHAR(160),
+				    summary VARCHAR(1000) NOT NULL,
+				    description CLOB NOT NULL,
+				    responsibilities CLOB,
+				    requirements CLOB NOT NULL,
+				    benefits CLOB,
+				    application_email VARCHAR(254) NOT NULL,
+				    application_url VARCHAR(2048),
+				    closing_date DATE,
+				    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+				)
+				""");
+	}
 
 	@Test
 	void contextLoads() {
@@ -85,7 +115,7 @@ class SystransApplicationTests {
 	}
 
 	@Test
-	void creatingJobRequiresAnAdminCookie() throws Exception {
+	void creatingJobRequiresAnAdminSession() throws Exception {
 		mockMvc.perform(post("/api/jobs")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""

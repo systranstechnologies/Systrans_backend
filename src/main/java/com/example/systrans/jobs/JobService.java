@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 
 @Service
 public class JobService {
@@ -62,7 +61,7 @@ public class JobService {
 				""";
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 		jdbcTemplate.update(connection -> {
-			PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			PreparedStatement statement = connection.prepareStatement(sql, new String[] { "id" });
 			statement.setString(1, request.title().trim());
 			statement.setString(2, request.department().trim());
 			statement.setString(3, request.location().trim());
